@@ -17,6 +17,7 @@ class UsageTracker:
     JSON example:
     {
         "user_name": "@user_name",
+        "email": "example@example.com",
         "current_cost": {
             "day": 0.45,
             "month": 3.23,
@@ -66,6 +67,7 @@ class UsageTracker:
             # create new dictionary for this user
             self.usage = {
                 "user_name": user_name,
+                "email": "",
                 "current_cost": {"day": 0.0, "month": 0.0, "all_time": 0.0, "last_update": str(date.today())},
                 "usage_history": {"chat_tokens": {}, "transcription_seconds": {}, "number_images": {}, "tts_characters": {}, "vision_tokens":{}}
             }
@@ -362,3 +364,6 @@ class UsageTracker:
 
         all_time_cost = token_cost + transcription_cost + image_cost + vision_cost + tts_cost
         return all_time_cost
+    
+    def set_email(self, email):
+        self.usage["email"] = email

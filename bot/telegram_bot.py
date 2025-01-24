@@ -330,6 +330,52 @@ class ChatGPTTelegramBot:
                 )
 
         await wrap_with_indicator(update, context, _generate, constants.ChatAction.UPLOAD_VOICE)
+    
+    async def email(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Register user with email
+        """
+        email_query = message_text(update.message)
+        if not email_query:
+            await update.effective_message.reply_text(
+                message_thread_id=get_thread_id(update),
+                text=localized_text('email_no_prompt', self.config['bot_language'])
+            )
+            return
+
+        user = update.message.from_user
+        logging.info(f'New email request received from user {user.name} '
+                     f'(id: {user.id})')
+
+        user_id = user.id
+        if user_id not in self.usage:
+            self.usage[user_id] = UsageTracker(user_id, user.name)
+
+        def send_request():
+            try:
+                response = requests.post(
+                    os.environ.get('PROGKIDS_API', 'http://localhost'),
+                    json={'email': email_query, 'telegramId': user_id}
+                )
+                return response.status_code
+            except Exception as e:
+                logging.error(f'Error occurred: {str(e)}')
+                return None
+
+        with ThreadPoolExecutor() as executor:
+            status_code = await context.application.loop.run_in_executor(executor, send_request)
+
+            if status_code == 200:
+                self.usage[user_id].set_email(email_query)
+                await update.effective_message.reply_text(
+                    message_thread_id=get_thread_id(update),
+                    text=localized_text('email_set_success', self.config['bot_language'])
+                )
+            else:
+                await update.effective_message.reply_text(
+                    message_thread_id=get_thread_id(update),
+                    text=localized_text('email_set_error', self.config['bot_language'])
+                )
 
     async def transcribe(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
@@ -1059,6 +1105,7 @@ class ChatGPTTelegramBot:
         application.add_handler(CommandHandler('help', self.help))
         application.add_handler(CommandHandler('image', self.image))
         application.add_handler(CommandHandler('tts', self.tts))
+        application.add_handler(CommandHandler('email', self.email))
         application.add_handler(CommandHandler('start', self.help))
         application.add_handler(CommandHandler('stats', self.stats))
         application.add_handler(CommandHandler('resend', self.resend))
