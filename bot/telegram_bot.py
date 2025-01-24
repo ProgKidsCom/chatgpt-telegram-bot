@@ -22,6 +22,7 @@ from utils import is_group_chat, get_thread_id, message_text, wrap_with_indicato
     cleanup_intermediate_files
 from openai_helper import OpenAIHelper, localized_text
 from usage_tracker import UsageTracker
+from concurrent.futures import ThreadPoolExecutor
 
 
 class ChatGPTTelegramBot:
