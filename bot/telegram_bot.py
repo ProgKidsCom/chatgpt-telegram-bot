@@ -22,7 +22,7 @@ from utils import is_group_chat, get_thread_id, message_text, wrap_with_indicato
     cleanup_intermediate_files
 from openai_helper import OpenAIHelper, localized_text
 from usage_tracker import UsageTracker
-from concurrent.futures import ThreadPoolExecutor
+import httpx
 
 
 class ChatGPTTelegramBot:
@@ -352,31 +352,30 @@ class ChatGPTTelegramBot:
         if user_id not in self.usage:
             self.usage[user_id] = UsageTracker(user_id, user.name)
 
-        def send_request():
+        async def send_request():
             try:
-                response = requests.post(
-                    os.environ.get('PROGKIDS_API', 'http://localhost'),
-                    json={'email': email_query, 'telegramId': user_id}
-                )
-                return response.status_code
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        os.environ.get('PROGKIDS_API', 'http://localhost'),
+                        json={'email': email_query, 'telegramId': user_id}
+                    )
+                    return response.status_code
             except Exception as e:
                 logging.error(f'Error occurred: {str(e)}')
                 return None
 
-        with ThreadPoolExecutor() as executor:
-            status_code = await context.application.loop.run_in_executor(executor, send_request)
-
-            if status_code == 200:
-                self.usage[user_id].set_email(email_query)
-                await update.effective_message.reply_text(
-                    message_thread_id=get_thread_id(update),
-                    text=localized_text('email_set_success', self.config['bot_language'])
-                )
-            else:
-                await update.effective_message.reply_text(
-                    message_thread_id=get_thread_id(update),
-                    text=localized_text('email_set_error', self.config['bot_language'])
-                )
+        status_code = await send_request()
+        if status_code == 200:
+            self.usage[user_id].set_email(email_query)
+            await update.effective_message.reply_text(
+                message_thread_id=get_thread_id(update),
+                text=localized_text('email_set_success', self.config['bot_language'])
+            )
+        else:
+            await update.effective_message.reply_text(
+                message_thread_id=get_thread_id(update),
+                text=localized_text('email_set_error', self.config['bot_language'])
+            )
 
     async def transcribe(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
