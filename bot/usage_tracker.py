@@ -369,4 +369,7 @@ class UsageTracker:
         self.usage["email"] = email
     
     def get_email(self):
-        return self.usage["email"]
+        if "email" in self.usage:
+            return self.usage["email"]
+        else:
+            return ""
