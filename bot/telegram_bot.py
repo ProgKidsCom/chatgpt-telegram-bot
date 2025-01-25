@@ -344,6 +344,14 @@ class ChatGPTTelegramBot:
             )
             return
 
+        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_regex, email_query):
+            await update.effective_message.reply_text(
+                message_thread_id=get_thread_id(update),
+                text=localized_text('email_invalid', self.config.get('bot_language', 'en'))
+            )
+            return
+
         user = update.message.from_user
         logging.info(f'New email request received from user {user.name} '
                      f'(id: {user.id})')
