@@ -1057,11 +1057,13 @@ class ChatGPTTelegramBot:
             await self.send_disallowed_message(update, context, is_inline)
             return False
 
+        if user_id not in usage:
+            usage[user_id] = UsageTracker(user_id, name)
+
         async def send_request():
             try:
                 async with httpx.AsyncClient() as client:
                     email = self.usage[user_id].get_email()
-                    logging.error(f'{user_id}, {email}')
                     response = await client.post(
                         os.environ.get('PROGKIDS_API', 'http://localhost') + '/limits',
                         json={'email': email, 'telegramId': user_id}
