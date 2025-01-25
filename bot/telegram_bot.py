@@ -1065,20 +1065,16 @@ class ChatGPTTelegramBot:
             try:
                 async with httpx.AsyncClient() as client:
                     email = self.usage[user_id].get_email()
-                    logging.error(f'Request limits {user_id} { email }')
                     response = await client.post(
                         os.environ.get('PROGKIDS_API', 'http://localhost') + '/limits',
                         json={'email': email, 'telegramId': str(user_id)}
                     )
-                    logging.error(f'Response status: {response.status_code}, body: {response.text}')
                     return response.json() 
             except Exception as e:
                 logging.error(f'Error occurred: {str(e)}')
                 return { "unlim": False }
 
         limits = await send_request()
-        logging.error(f'Limits for user {user_id}: {str(limits)}')
-
         if not is_within_budget(self.config, limits, self.usage, update, is_inline=is_inline):
             logging.warning(f'User {name} (id: {user_id}) reached their usage limit')
             await self.send_budget_reached_message(update, context, is_inline)
