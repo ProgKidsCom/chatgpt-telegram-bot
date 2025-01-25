@@ -1057,7 +1057,7 @@ class ChatGPTTelegramBot:
             await self.send_disallowed_message(update, context, is_inline)
             return False
 
-         async def send_request():
+        async def send_request():
             try:
                 async with httpx.AsyncClient() as client:
                     email = self.usage[user_id].get_email()
