@@ -1056,6 +1056,23 @@ class ChatGPTTelegramBot:
             logging.warning(f'User {name} (id: {user_id}) is not allowed to use the bot')
             await self.send_disallowed_message(update, context, is_inline)
             return False
+
+         async def send_request():
+            try:
+                async with httpx.AsyncClient() as client:
+                    email = self.usage[user_id].get_email()
+                    response = await client.post(
+                        os.environ.get('PROGKIDS_API', 'http://localhost') + '/limits',
+                        json={'email': email, 'telegramId': user_id}
+                    )
+                    return response.json() 
+            except Exception as e:
+                logging.error(f'Error occurred: {str(e)}')
+                return None
+
+        limits = await send_request()
+        logging.error(f'Limits for user {user_id}: {str(limits)}')
+
         if not is_within_budget(self.config, self.usage, update, is_inline=is_inline):
             logging.warning(f'User {name} (id: {user_id}) reached their usage limit')
             await self.send_budget_reached_message(update, context, is_inline)

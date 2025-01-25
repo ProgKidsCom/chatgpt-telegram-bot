@@ -367,3 +367,6 @@ class UsageTracker:
     
     def set_email(self, email):
         self.usage["email"] = email
+    
+    def get_email(self):
+        return self.usage["email"]
