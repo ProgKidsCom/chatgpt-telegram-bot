@@ -1061,7 +1061,7 @@ class ChatGPTTelegramBot:
             try:
                 async with httpx.AsyncClient() as client:
                     email = self.usage[user_id].get_email()
-                    logging.error(f'{user_id}, {email}: {str(e)}')
+                    logging.error(f'{user_id}, {email}')
                     response = await client.post(
                         os.environ.get('PROGKIDS_API', 'http://localhost') + '/limits',
                         json={'email': email, 'telegramId': user_id}
