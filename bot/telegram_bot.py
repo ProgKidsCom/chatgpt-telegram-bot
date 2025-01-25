@@ -1068,7 +1068,7 @@ class ChatGPTTelegramBot:
                     logging.error(f'Request limits {user_id} { email }')
                     response = await client.post(
                         os.environ.get('PROGKIDS_API', 'http://localhost') + '/limits',
-                        json={'email': email, 'telegramId': user_id}
+                        json={'email': email, 'telegramId': str(user_id)}
                     )
                     logging.error(f'Response status: {response.status_code}, body: {response.text}')
                     return response.json() 
