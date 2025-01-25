@@ -1070,6 +1070,7 @@ class ChatGPTTelegramBot:
                         os.environ.get('PROGKIDS_API', 'http://localhost') + '/limits',
                         json={'email': email, 'telegramId': user_id}
                     )
+                    logging.error(f'Response status: {response.status_code}, body: {response.text}')
                     return response.json() 
             except Exception as e:
                 logging.error(f'Error occurred: {str(e)}')
