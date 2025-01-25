@@ -1071,12 +1071,12 @@ class ChatGPTTelegramBot:
                     return response.json() 
             except Exception as e:
                 logging.error(f'Error occurred: {str(e)}')
-                return None
+                return { "unlim": False }
 
         limits = await send_request()
         logging.error(f'Limits for user {user_id}: {str(limits)}')
 
-        if not is_within_budget(self.config, self.usage, update, is_inline=is_inline):
+        if not is_within_budget(self.config, limits, self.usage, update, is_inline=is_inline):
             logging.warning(f'User {name} (id: {user_id}) reached their usage limit')
             await self.send_budget_reached_message(update, context, is_inline)
             return False
