@@ -1057,8 +1057,8 @@ class ChatGPTTelegramBot:
             await self.send_disallowed_message(update, context, is_inline)
             return False
 
-        if user_id not in usage:
-            usage[user_id] = UsageTracker(user_id, name)
+        if user_id not in self.usage:
+            self.usage[user_id] = UsageTracker(user_id, name)
 
         async def send_request():
             try:
