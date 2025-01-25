@@ -261,7 +261,7 @@ def get_remaining_budget(config, usage, update: Update, is_inline=False) -> floa
     return config['guest_budget'] - cost
 
 
-def is_within_budget(config, usage, update: Update, is_inline=False) -> bool:
+def is_within_budget(config, limits, usage, update: Update, is_inline=False) -> bool:
     """
     Checks if the user reached their usage limit.
     Initializes UsageTracker for user and guest when needed.
@@ -271,6 +271,9 @@ def is_within_budget(config, usage, update: Update, is_inline=False) -> bool:
     :param is_inline: Boolean flag for inline queries
     :return: Boolean indicating if the user has a positive budget
     """
+    if limits.unlim:
+        return True
+
     user_id = update.inline_query.from_user.id if is_inline else update.message.from_user.id
     name = update.inline_query.from_user.name if is_inline else update.message.from_user.name
     if user_id not in usage:
