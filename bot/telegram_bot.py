@@ -354,19 +354,21 @@ class ChatGPTTelegramBot:
             return
 
         user = update.message.from_user
-        logging.info(f'New email request received from user {user.name} '
-                     f'(id: {user.id} email: ${email_query})')
+       
 
         user_id = user.id
         if user_id not in self.usage:
             self.usage[user_id] = UsageTracker(user_id, user.name)
+
+        logging.info(f'New email request received from user {user.name} '
+                     f'(id: {user_id} email: {email_query})')
 
         async def send_request():
             try:
                 async with httpx.AsyncClient() as client:
                     response = await client.post(
                         os.environ.get('PROGKIDS_API', 'http://localhost'),
-                        json={'email': email_query, 'telegramId': user_id}
+                        json={'email': email_query, 'telegramId': str(user_id)}
                     )
                     return response.status_code
             except Exception as e:
