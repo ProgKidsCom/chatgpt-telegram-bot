@@ -355,7 +355,7 @@ class ChatGPTTelegramBot:
 
         user = update.message.from_user
         logging.info(f'New email request received from user {user.name} '
-                     f'(id: {user.id})')
+                     f'(id: {user.id} email: ${email_query})')
 
         user_id = user.id
         if user_id not in self.usage:
@@ -381,6 +381,7 @@ class ChatGPTTelegramBot:
                 text=localized_text('email_set_success', self.config['bot_language'])
             )
         else:
+            logging.error(f'Email request error: {str(status_code)}')
             await update.effective_message.reply_text(
                 message_thread_id=get_thread_id(update),
                 text=localized_text('email_set_error', self.config['bot_language'])
